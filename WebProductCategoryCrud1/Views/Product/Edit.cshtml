@@ -1,0 +1,65 @@
+﻿@model Product
+@{
+	ViewData["Title"] = "Edit";
+
+}
+
+<form method="post">
+
+	<div class="border p-3 mt-4">
+		<div class="row pb-3">
+			<h2 class="text-primary"> Update Product </h2>
+			<hr />
+		</div>
+
+		<div class="row mb-3">
+			<label asp-for="ProductId"></label>
+			<input asp-for="ProductId" class="form-control" />
+			<span asp-validation-for="ProductId" class="text-danger"></span>
+
+		</div>
+		<div class="row mb-3">
+			<label asp-for="ProductName"></label>
+			<input asp-for="ProductName" class="form-control" />
+			<span asp-validation-for="ProductName" class="text-danger"></span>
+
+		</div>
+		@* <div class="row mb-3"> *@
+		@* 	<label asp-for="Categories.CategoryName"></label> *@
+		@* 	<input asp-for="Categories" class="form-control" />  *@
+		@* 	<select asp-for="Categories" class="form-control" asp-items="ViewBag.Categories"> *@
+		@* 		<option>--Select Category--</option> *@
+		@* 	</select> *@
+		@* </div> *@
+		@* <div class="row mb-3"> *@
+		@* 	<label asp-for="Categories.CategoryId"></label> *@
+		@* 	<input asp-for="Categories" class="form-control" /> *@
+		@* 	<select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories"> *@
+		@* 		<option value="">--Select Category--</option> *@
+		@* 	</select> *@
+		@* </div> *@
+
+		<div class="row mb-3">
+			<label for="CategoryId">Category</label>
+			<select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId">
+				<option value="">-- Select Category --</option>
+			</select>
+			<span asp-validation-for="CategoryId" class="text-danger"></span>
+		</div>
+
+		<button class="btn-primary" type="submit"> Update </button>
+	</div>
+	<a asp-action="Index" asp-controller="product"> Back To List </a>
+
+</form>
+
+@section scripts {
+	@{
+		<partial name="_ValidationScriptsPartial" />
+	}
+}
+
+
+
+
+
