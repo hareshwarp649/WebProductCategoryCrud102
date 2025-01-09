@@ -1,135 +1,135 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Drawing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebProductCategoryCrud1.Data;
+using WebProductCategoryCrud1.Infrastrucure.IRepository;
 using WebProductCategoryCrud1.Models;
+using WebProductCategoryCrud1.ViewModel;
 
 namespace WebProductCategoryCrud1.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private IUnitOfWork _unitOfWork;
 
-        public ProductController(ApplicationDbContext context)
+        public ProductController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
-
-        public IActionResult Index(int pg=1)
+        #region APICALL
+        public IActionResult AllProducts()
         {
-            //var products = _context.Products
-            //               .Include(p => p.Categories)
-            //               .OrderBy(p => p.ProductId)
-            //               .Skip((page - 1) * pageSize)
-            //               .Take(pageSize)
-            //               .ToList();
-
-            //var totalProducts = _context.Products.Count();
-            //ViewBag.TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
-            //ViewBag.CurrentPage = page;
-
-            var products = _context.Products.ToList();
-
-            const int pageSize = 10;
-            if (pg < 1)
-                pg = 1;
-            int recsCount=products.Count();
-            var pager = new Pager(recsCount, pg, pageSize);
-            int recSkip = (pg - 1) * pageSize;
-            var data= products.Skip(recSkip).Take(pageSize).ToList();
-            this.ViewBag.Pager=pager;
-            return View(data);
-            //return View(products);
+            var products = _unitOfWork.Product.GetAll(includeProperties:"Category");
+            return Json(new {data= products });
         }
+        #endregion
 
-        public IActionResult Create()
+        public IActionResult Index()
         {
-            ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Categories, "CategoryId", "CategoryName");
+           // ProductVM productVM=new ProductVM();
+           // productVM.Products = _unitOfWork.Product.GetAll();
+
+            //const int pageSize = 5;
+            //if (pg < 1)
+            //    pg = 1;
+            //int recsCount = products.Count();
+            //var pager = new Pager(recsCount, pg, pageSize);
+            //int recSkip = (pg - 1) * pageSize;
+            //var data = products.Skip(recSkip).Take(pageSize).ToList();
+            //this.ViewBag.Pager = pager;
+            //return View(data);
             return View();
+        }
+
+        public IActionResult CreateUpdate(int? id)
+        {
+            ProductVM vm = new ProductVM()
+            {
+                Product=new(),
+                Categories=_unitOfWork.Category.GetAll().Select(x=>
+                new SelectListItem()
+                {
+                    Text=x.CategoryName,
+                    Value=x.CategoryId.ToString()
+
+                })
+            };
+            if (id == null || id == 0)
+            {
+                return View(vm);
+            }
+            else
+            {
+                vm.Product = _unitOfWork.Product.GetT(x => x.ProductId == id);
+                if (vm.Product == null)
+                {
+                    return NotFound();
+                }else
+                {
+                    return View(vm);
+                }
+            }
+            //ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Categories, "CategoryId", "CategoryName");
+            //return View();
         }
 
         
        [HttpPost]
        [ValidateAntiForgeryToken]
-        public IActionResult Create(Product product)
+        public IActionResult CreateUpdate(ProductVM vm)
         {
-            
+           
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
-            }
 
-            ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Categories, "CategoryId", "CategoryName", product.CategoryId);
-            return View(product);
-        }
+                //if (_unitOfWork.Product.Any(p => p.ProductName == vm.ProductName && p.CategoryId == vm.CategoryId))
+                //{
+                //    ModelState.AddModelError(string.Empty, "Duplicate product entry not allowed.");
+                //    ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", vm.Products);
+                //    return View(vm);
+                //}
 
-        public IActionResult Edit(int id)
-        {
-            var product = _context.Products.Find(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Categories, "CategoryId", "CategoryName", product.CategoryId);
-            return View(product);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Product product)
-        {
-            if (id != product.ProductId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                string fileName = String.Empty;
+                if (vm.Product.ProductId == 0)
                 {
-                    _context.Update(product);
-                    _context.SaveChanges();
+                    _unitOfWork.Product.Add(vm.Product);
+                    TempData["success"] = "Product Created Done!";
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!_context.Products.Any(e => e.ProductId == product.ProductId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    _unitOfWork.Product.Update(vm.Product);
+                    TempData["success"] = "Product Update Done !";
                 }
-                return RedirectToAction(nameof(Index));
-            }
 
-            ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Categories, "CategoryId", "CategoryName", product.CategoryId);
-            return View(product);
+                // ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Categories, "CategoryId", "CategoryName", product.CategoryId);
+                _unitOfWork.Save();
+                return RedirectToAction("Index");
+            }
+            return RedirectToAction("Index");
         }
 
+        #region DeleteAPICALL
+        [HttpDelete]
         public IActionResult Delete(int id)
         {
-            var product = _context.Products.Find(id);
+            var product = _unitOfWork.Product.GetT(x => x.ProductId == id);
             if (product == null)
             {
-                return NotFound();
+                return Json(new { Success = false, Error = "Error in Fenching Data" });
             }
-            return View(product);
+            else
+            {
+                _unitOfWork.Product.Delete(product);
+                _unitOfWork.Save();
+                return Json(new { Success = true, message = "Product Delete" });
+            }
         }
+        #endregion
 
-        // POST: Product/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
-        {
-            var product = _context.Products.Find(id);
-            _context.Products.Remove(product);
-            _context.SaveChanges();
-            return RedirectToAction(nameof(Index));
-        }
+
+
+
 
     }
 }

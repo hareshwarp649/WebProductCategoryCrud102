@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace WebProductCategoryCrud1.Models
 {
@@ -8,8 +9,9 @@ namespace WebProductCategoryCrud1.Models
 
         public int ProductId { get; set; }
         [Required]
-        public required string ProductName { get; set; }
+        public string ProductName { get; set; }
         public int CategoryId { get; set; }
+        [ValidateNever]
 
         public Category Category { get; set; }
     }

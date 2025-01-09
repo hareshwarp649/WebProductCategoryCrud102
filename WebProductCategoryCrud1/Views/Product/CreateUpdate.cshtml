@@ -1,0 +1,68 @@
+﻿@model WebProductCategoryCrud1.ViewModel.ProductVM
+@{
+	ViewData["Title"] = "Create";
+	
+}
+
+<form method="post" asp-action="CreateUpdate">
+
+	//<input type="hidden" asp-for="Product.ProductId" />
+
+
+	<div class="border p-3 mt-4">
+		<div class="row pb-3">
+			<h2 class="text-primary"> @((Model.Product==null || Model.Product.ProductId==0)?"Create" :"Update") Product </h2>
+			<hr />
+		</div>
+		<div asp-validation-summary=All></div>
+		<div class="row mb-3">
+			<label asp-for="Product.ProductId"></label>
+			<input asp-for="Product.ProductId" class="form-control" />
+			<span asp-validation-for="Product.ProductId" class="text-danger"></span>
+
+		</div>
+		<div class="row mb-3">
+			<label asp-for="Product.ProductName"></label>
+			<input asp-for="Product.ProductName" class="form-control" />
+			<span asp-validation-for="Product.ProductName" class="text-danger"></span>
+
+		</div>
+
+		<div class="row mb-3">
+			<label for="CategoryId">Category</label>
+			<select asp-for="Product.CategoryId" class="form-select" asp-items="@Model.Categories">
+				<option value="">-- Select Category --</option>
+			</select>
+			<span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+		</div>
+
+		@* <div class="row mb-3"> *@
+		@* 	<label for="CategoryId">Category</label> *@
+		@* 	<select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId"> *@
+		@* 		<option value="">-- Select Category --</option> *@
+		@* 	</select> *@
+		@* 	<span asp-validation-for="CategoryId" class="text-danger"></span> *@
+		@* </div> *@
+
+		@if(Model.Product==null || Model.Product.ProductId==0)
+		{
+			<button class="btn btn-primary" onclick="return ValidateEmpty()" type="submit"> Create </button>
+		}
+		else
+		{
+			<button class="btn btn-primary" type="submit"> Update </button>
+		}
+		
+	</div>
+	<a asp-action="Index" asp-controller="product"> Back To List </a>
+
+</form>
+
+@section scripts {
+	@{
+		<partial name="_ValidationScriptsPartial" />
+	}
+}
+
+
+

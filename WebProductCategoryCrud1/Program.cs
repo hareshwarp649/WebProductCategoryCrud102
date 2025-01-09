@@ -1,10 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using WebProductCategoryCrud1.Data;
+using WebProductCategoryCrud1.Infrastrucure.IRepository;
+using WebProductCategoryCrud1.Infrastrucure.IService;
+using WebProductCategoryCrud1.Infrastrucure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IUnitOfWork,UnitOfWork>();
+//builder.Services.AddScoped<ICategoryServices, ICategoryServices>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("SecondDbConnection"));
