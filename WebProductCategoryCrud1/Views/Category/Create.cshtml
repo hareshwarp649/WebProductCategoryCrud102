@@ -25,6 +25,13 @@
 
 </form>
 
+@if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey("Name"))
+{
+	<div class="alert alert-danger">
+		@ViewData.ModelState["Name"]?.Errors.FirstOrDefault()?.ErrorMessage
+	</div>
+}
+
 @section scripts {
 	@{
 		<partial name="_ValidationScriptsPartial" />

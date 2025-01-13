@@ -4,9 +4,10 @@
 	
 }
 
+
 <form method="post" asp-action="CreateUpdate">
 
-	//<input type="hidden" asp-for="Product.ProductId" />
+	<input type="hidden" asp-for="Product.ProductId" />
 
 
 	<div class="border p-3 mt-4">
@@ -25,6 +26,7 @@
 			<label asp-for="Product.ProductName"></label>
 			<input asp-for="Product.ProductName" class="form-control" />
 			<span asp-validation-for="Product.ProductName" class="text-danger"></span>
+			@Html.ValidationMessageFor(model => model.Product.ProductName, "", new { @class = "text-danger" })
 
 		</div>
 
@@ -32,6 +34,7 @@
 			<label for="CategoryId">Category</label>
 			<select asp-for="Product.CategoryId" class="form-select" asp-items="@Model.Categories">
 				<option value="">-- Select Category --</option>
+				
 			</select>
 			<span asp-validation-for="Product.CategoryId" class="text-danger"></span>
 		</div>
@@ -57,6 +60,14 @@
 	<a asp-action="Index" asp-controller="product"> Back To List </a>
 
 </form>
+
+@* @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey("Name")) *@
+@* { *@
+@* 	<div class="alert alert-danger"> *@
+@* 		@ViewData.ModelState["Name"]?.Errors.FirstOrDefault()?.ErrorMessage *@
+@* 	</div> *@
+@* } *@
+
 
 @section scripts {
 	@{

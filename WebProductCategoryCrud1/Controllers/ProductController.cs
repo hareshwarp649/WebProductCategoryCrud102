@@ -30,15 +30,7 @@ namespace WebProductCategoryCrud1.Controllers
            // ProductVM productVM=new ProductVM();
            // productVM.Products = _unitOfWork.Product.GetAll();
 
-            //const int pageSize = 5;
-            //if (pg < 1)
-            //    pg = 1;
-            //int recsCount = products.Count();
-            //var pager = new Pager(recsCount, pg, pageSize);
-            //int recSkip = (pg - 1) * pageSize;
-            //var data = products.Skip(recSkip).Take(pageSize).ToList();
-            //this.ViewBag.Pager = pager;
-            //return View(data);
+           
             return View();
         }
 
@@ -55,6 +47,8 @@ namespace WebProductCategoryCrud1.Controllers
 
                 })
             };
+
+
             if (id == null || id == 0)
             {
                 return View(vm);
@@ -70,27 +64,30 @@ namespace WebProductCategoryCrud1.Controllers
                     return View(vm);
                 }
             }
-            //ViewBag.CategoryId = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(_context.Categories, "CategoryId", "CategoryName");
-            //return View();
+            
         }
 
         
        [HttpPost]
        [ValidateAntiForgeryToken]
-        public IActionResult CreateUpdate(ProductVM vm)
+        public IActionResult CreateUpdate(int? id,ProductVM vm )
         {
            
             if (ModelState.IsValid)
             {
+                //bool isDuplicate = false;
 
-                //if (_unitOfWork.Product.Any(p => p.ProductName == vm.ProductName && p.CategoryId == vm.CategoryId))
-                //{
-                //    ModelState.AddModelError(string.Empty, "Duplicate product entry not allowed.");
-                //    ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", vm.Products);
-                //    return View(vm);
-                //}
+                //var existingProduct = _unitOfWork.Product.GetT(x => x.ProductName == vm.Product.ProductName && x.CategoryId != id);
+                var existingProduct = _unitOfWork.Product.GetT(x => x.ProductName == vm.Product.ProductName && (id == null || x.ProductId != id));
+                if (existingProduct != null)
+                {
 
-                string fileName = String.Empty;
+                    ModelState.AddModelError("Name", "A product with the same name already exists Please Update another Product name.");
+                    return View(vm);
+                }
+
+                
+                //string fileName = String.Empty;
                 if (vm.Product.ProductId == 0)
                 {
                     _unitOfWork.Product.Add(vm.Product);

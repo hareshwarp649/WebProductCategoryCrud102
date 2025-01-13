@@ -47,18 +47,19 @@ namespace WebProductCategoryCrud1.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category category, int id)
         {
-            
-            if(_unitOfWork.Category==category)
+            var existingCategory = _unitOfWork.Category.GetT(x => x.CategoryName == category.CategoryName && x.CategoryId != id);
+            if (existingCategory != null)
             {
-                _unitOfWork.Category.Delete(category);
                 
+                ModelState.AddModelError("Name", "A category with the same name already exists, Please Create another Category.");
+                return View(category); 
             }
-            
-            category.CategoryId = 0;
+            category.CategoryId = id;
             if (ModelState.IsValid)
             {
                 _unitOfWork.Category.Add(category);
                 _unitOfWork.Save();
+                TempData["success"] = "Category Created Done!";
                 return RedirectToAction("Index");
             }
             return View(category);
@@ -80,6 +81,14 @@ namespace WebProductCategoryCrud1.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Category category)
         {
+
+            var existingCategory = _unitOfWork.Category.GetT(x => x.CategoryName == category.CategoryName && x.CategoryId != id);
+            if (existingCategory != null)
+            {
+               
+                ModelState.AddModelError("Name", "A category with the same name already exists Please Update another Category.");
+                return View(category); 
+            }
 
             if (ModelState.IsValid)
             {
